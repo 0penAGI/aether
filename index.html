@@ -260,7 +260,8 @@
         .menu-items a:nth-child(3) { animation-delay: 0.15s; }
         .menu-items a:nth-child(4) { animation-delay: 0.2s; }
         .menu-items a:nth-child(5) { animation-delay: 0.25s; }
-        .menu-items .social-link { animation-delay: 0.3s; }
+        .menu-items a:nth-child(6) { animation-delay: 0.30s; }
+        .menu-items .social-link { animation-delay: 0.35s; }
 
         @keyframes fadeInDown {
             to {
@@ -543,6 +544,13 @@
             margin-right: auto;
         }
 
+        .project-content pre {
+            background: #f7f7f7 !important;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
         @media (max-width: 768px) {
             .header-content,
             .gallery {
@@ -593,8 +601,10 @@
                 <a href="#" data-filter="core" class="active">core</a>
                 <a href="#" data-filter="memory">memory</a>
                 <a href="#" data-filter="tools">tools</a>
+                <a href="#" data-filter="web">web</a>
                 <a href="#" data-filter="skills">skills</a>
                 <a href="#" data-filter="runtime">runtime</a>
+                <a href="#" data-filter="persistence">persistence</a>
                 <a href="#info">about</a>
                 <a href="https://github.com/0penAGI/aether" target="_blank" class="social-link">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -693,6 +703,34 @@ self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability me
                     <div class="gallery-caption"><strong>Vector Memory</strong> · FAISS‑based semantic recall</div>
                 </div>
 
+                <!-- WEB tools -->
+                <div class="gallery-item code-card" data-category="web" data-project="web-search">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">def</span> <span class="fn">web_search</span>(<span class="kw">self</span>, query):
+    <span class="cmt"># DuckDuckGo read‑only search</span>
+    <span class="kw">if</span> now - self.web_last_call < self.web_min_interval:
+        <span class="kw">return</span> <span class="str">"Error: web rate limit active"</span>
+    <span class="cmt"># Cache results, publish event</span>
+    self.event_bus.publish(Event(...))
+    <span class="kw">return</span> content
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Web Search</strong> · cached DuckDuckGo queries</div>
+                </div>
+                <div class="gallery-item code-card" data-category="web" data-project="fetch-url">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">def</span> <span class="fn">fetch_url</span>(<span class="kw">self</span>, url):
+    <span class="cmt"># Fetch any URL, cached</span>
+    r = requests.get(url, ...)
+    self.web_cache[url] = r.text[:<span class="num">12000</span>]
+    <span class="kw">return</span> content
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Fetch URL</strong> · read‑only URL fetcher</div>
+                </div>
+
                 <!-- TOOLS items (banners) -->
                 <div class="gallery-item press-banner" data-category="tools">
                     <a href="https://github.com/0penAGI/aether" target="_blank" class="press-link" style="background:#2c2c2c;">
@@ -756,6 +794,33 @@ self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability me
                     <div class="gallery-caption"><strong>Autonomous Breathing</strong> · self‑generated tasks</div>
                 </div>
 
+                <!-- PERSISTENCE items -->
+                <div class="gallery-item code-card" data-category="persistence" data-project="project-state">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">def</span> <span class="fn">save_project_state</span>(<span class="kw">self</span>, project_id, data):
+    <span class="cmt"># Save project context snapshots</span>
+    projects.setdefault(project_id, []).append({
+        <span class="str">"t"</span>: time.time(), <span class="str">"data"</span>: data
+    })
+    self.project_file.write_text(...)
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Project State Persistence</strong> · task‑level memory snapshots</div>
+                </div>
+                <div class="gallery-item code-card" data-category="persistence" data-project="field-state">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="cmt"># Field‑state synchronization</span>
+self.field_C_state = self.C
+self.field_m_state = min(<span class="num">1.0</span>, len(self.history) / HISTORY_WIN)
+self.field_e_state = self.e_history[-<span class="num">1</span>] if self.e_history else <span class="num">0.0</span>
+self.field_T_state = self.topology_T
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Field State Sync</strong> · structured consciousness variables</div>
+                </div>
+
             </div>
         </section>
 
@@ -780,7 +845,8 @@ self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability me
                 <p>Built with Python, Ollama, FAISS, and Rich.</p>
                 <p>
                     <a href="mailto:elliia@0penagi.org">elliia@0penagi.org</a><br>
-                    <a href="https://github.com/0penAGI/aether" target="_blank">github.com/0penAGI/aether</a>
+                    <a href="https://github.com/0penAGI/aether" target="_blank">github.com/0penAGI/aether</a><br>
+                    <a href="https://raw.githubusercontent.com/0penAGI/aether/main/aether.py" target="_blank">Full source code (aether.py)</a>
                 </p>
             </div>
         </section>
@@ -949,7 +1015,7 @@ self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability me
 </pre>`,
             'state-machine': `<h2>State Machine</h2>
                 <p>Implements a finite automaton with valid transitions: <code>IDLE → PLAN → EXECUTE → VERIFY → DONE</code>, plus <code>FIX</code> and <code>INTERRUPTED</code> states. Events can force a state change, e.g., an idle timeout transitions to <code>SLEEPING</code>. The machine logs every transition for debugging.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">class</span> <span class="fn">StateMachine</span>:
     VALID_TRANSITIONS = {
         AgentState.IDLE: [AgentState.PLAN, AgentState.SLEEPING],
@@ -964,7 +1030,7 @@ self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability me
 </pre>`,
             'tool-registry': `<h2>Tool Registry</h2>
                 <p>Stores tools and their <code>ToolCapability</code> metadata (side effects, required/produced resources, risk level). Tracks a usage graph and success rates, enabling recommendations for chaining tools. Supports capability‑based lookup and dynamic skill registration.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">class</span> <span class="fn">ToolRegistry</span>:
     <span class="kw">def</span> <span class="fn">register</span>(<span class="kw">self</span>, name, func, capability):
         ...
@@ -973,7 +1039,7 @@ self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability me
 </pre>`,
             'memory-store': `<h2>Memory Re‑hydration</h2>
                 <p>All agent state is persisted to disk in JSON files. On startup, <code>MemoryStore.rehydrate()</code> restores history, summaries, skill memory, tool usage graphs, reward history, and even field variables. This allows the agent to resume from where it left off after a restart.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">def</span> <span class="fn">rehydrate</span>(<span class="kw">self</span>, agent):
     short = self.load_short_term()
     long = self.load_long_term()
@@ -983,21 +1049,40 @@ self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability me
 </pre>`,
             'field-memory': `<h2>Field‑Theoretic Memory</h2>
                 <p>A lightweight dynamic model inspired by field theory: <em>C</em> (coherence), <em>m_field</em> (tool outcomes), <em>e_history</em> (error proxy), and <em>topology_T</em> (stability). These are updated after each tool call and influence autonomous decision‑making.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 self.C = 0.9 * self.C + 0.1 * (1.0 - e)   <span class="cmt"># smooth coherence</span>
 self.topology_T = 0.8 * self.topology_T + 0.2 * stability
 </pre>`,
             'vector-memory': `<h2>Vector Memory (FAISS)</h2>
                 <p>Every meaningful message is embedded using <code>nomic-embed-text</code> and stored in a FAISS <code>IndexFlatIP</code>. The agent can later recall semantically similar memories via <code>recall_vector(query)</code>, providing a long‑term associative memory layer.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">def</span> <span class="fn">remember_vector</span>(<span class="kw">self</span>, text):
     emb = self.embed(text)
     self.vector_index.add(emb)
     self.vector_memory.append({<span class="str">'text'</span>: text, ...})
 </pre>`,
+            'web-search': `<h2>Web Search</h2>
+                <p>Uses DuckDuckGo HTML search to fetch results. Responses are cached and rate‑limited. The tool publishes an <code>EXTERNAL_TRIGGER</code> event after a successful search.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
+<span class="kw">def</span> <span class="fn">web_search</span>(<span class="kw">self</span>, query):
+    url = <span class="str">"https://duckduckgo.com/html/?q="</span> + query
+    r = requests.get(url, ...)
+    self.web_cache[query] = r.text[:<span class="num">8000</span>]
+    self.event_bus.publish(Event(EventType.EXTERNAL_TRIGGER, ...))
+    <span class="kw">return</span> content
+</pre>`,
+            'fetch-url': `<h2>Fetch URL</h2>
+                <p>Retrieves content from a given URL, cached and rate‑limited. Returns up to 12 000 characters. Used for read‑only web access.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
+<span class="kw">def</span> <span class="fn">fetch_url</span>(<span class="kw">self</span>, url):
+    r = requests.get(url, ...)
+    content = r.text[:<span class="num">12000</span>]
+    self.web_cache[url] = content
+    <span class="kw">return</span> content
+</pre>`,
             'skill-mining': `<h2>Skill Mining</h2>
                 <p>The agent buffers successful (step, tool) pairs and periodically scans for repeating n‑grams (length 2‑4). When a novel pattern is found, it is registered as a derived skill — a reusable macro that can be invoked directly in future plans.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">for</span> size <span class="kw">in</span> (<span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>):
     window = self._skill_buffer[i:i+size]
     <span class="kw">if</span> pattern_is_new(window):
@@ -1005,7 +1090,7 @@ self.topology_T = 0.8 * self.topology_T + 0.2 * stability
 </pre>`,
             'derived-skills': `<h2>Derived Skills</h2>
                 <p>Derived skills become first‑class citizens in the tool registry, with their own capability metadata. They can be called like any other tool and appear in the usage graph. This allows the agent to abstract and reuse complex action sequences.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">def</span> <span class="fn">_register_derived_skill</span>(<span class="kw">self</span>, name, pattern):
     <span class="kw">def</span> <span class="fn">skill_runner</span>(**kwargs):
         <span class="kw">return</span> f<span class="str">"EXECUTED_SKILL:{name}"</span>
@@ -1013,7 +1098,7 @@ self.topology_T = 0.8 * self.topology_T + 0.2 * stability
 </pre>`,
             'gateway-loop': `<h2>Gateway Loop</h2>
                 <p>The persistent gateway thread drains the event bus, checks for idle timeouts, watches files, and triggers autonomous impulses. It runs every 5 seconds, keeping the agent alive and responsive without a blocking main loop.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">while</span> self._gateway_running:
     events = self.event_bus.drain()
     <span class="kw">for</span> event <span class="kw">in</span> events:
@@ -1023,13 +1108,28 @@ self.topology_T = 0.8 * self.topology_T + 0.2 * stability
 </pre>`,
             'autonomous-breathing': `<h2>Autonomous Breathing</h2>
                 <p>A separate thread generates "breath pulses" every 60 seconds, logs daily markers, and occasionally triggers autonomous task generation when the agent has been idle for 15 minutes. This creates a self‑sustaining creative loop.</p>
-                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
 <span class="kw">def</span> <span class="fn">_heartbeat</span>(<span class="kw">self</span>):
     <span class="kw">while</span> self.breathing:
         self._log_day_event(<span class="str">"tick"</span>)
         <span class="kw">if</span> self.autonomous <span class="kw">and</span> idle > <span class="num">900</span>:
             self._autonomous_step()
         time.sleep(self.breath_interval)
+</pre>`,
+            'project-state': `<h2>Project State Persistence</h2>
+                <p>Project‑level snapshots are saved under a unique project ID, allowing the agent to retrieve context from past sessions of the same task. Combined with vector recall, this provides a rich long‑term memory.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
+<span class="kw">def</span> <span class="fn">save_project_state</span>(<span class="kw">self</span>, project_id, data):
+    projects.setdefault(project_id, []).append({<span class="str">"t"</span>: time.time(), <span class="str">"data"</span>: data})
+    self.project_file.write_text(...)
+</pre>`,
+            'field-state': `<h2>Field State Synchronization</h2>
+                <p>The agent continuously synchronizes its internal field dynamics (<code>C</code>, <code>m_field</code>, <code>e_history</code>, <code>topology_T</code>) into structured variables that can be persisted and restored. This gives the agent a form of "consciousness" that survives restarts.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
+self.field_C_state = self.C
+self.field_m_state = min(1.0, len(self.history) / HISTORY_WIN)
+self.field_e_state = self.e_history[-1] if self.e_history else 0.0
+self.field_T_state = self.topology_T
 </pre>`
         };
 
