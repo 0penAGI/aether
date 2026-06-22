@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether · Autonomous CLI Agent</title>
+    <meta name="description" content="Aether — автономный CLI-агент от 0penAGI / Elliia Belokopytova. Распределённая событийная архитектура, перестраиваемая память и самообучающиеся инструменты.">
+    <meta property="og:title" content="Aether">
+    <meta property="og:description" content="Autonomous CLI agent with event-driven mesh, field-theoretic memory, and skill evolution.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aether">
+    <meta name="twitter:description" content="Autonomous CLI agent with event-driven mesh, field-theoretic memory, and skill evolution.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --border: #e0e0e0;
+            --hover: #f8f8f8;
+            --code-bg: #f7f7f7;
+            --code-border: #e5e5e5;
+            --accent: #2c2c2c;
+            --term-green: #4b8b4b;
+            --term-blue: #3b6ea5;
+            --term-orange: #b85c00;
+            --term-purple: #7c3a8f;
+            --term-red: #c04040;
+            --term-cyan: #2d8f8f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            overflow-x: hidden;
+            max-width: 100vw;
+            font-weight: 400;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        body.ready {
+            opacity: 1;
+        }
+
+        .page-fade {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+
+        .page-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        header {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.25);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+            z-index: 1001;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 32px;
+            position: relative;
+        }
+
+        .logo {
+            position: relative;
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: lowercase;
+            z-index: 1002;
+            line-height: 1;
+            transition: opacity 0.9s ease, transform 0.6s ease;
+            cursor: default;
+        }
+
+        .logo.lift {
+            transform: translateY(-5.5px);
+        }
+
+        .logo-sub {
+            position: absolute;
+            top: 131%;
+            left: 50%;
+            transform: translate(-50%, 5px);
+            font-size: 9.9px;
+            letter-spacing: 0.6px;
+            opacity: 0;
+            transition: opacity 0.31s ease, transform 0.31s ease;
+            text-transform: lowercase;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            color: #555;
+        }
+
+        .logo-sub.show {
+            opacity: 0.6;
+            transform: translate(-50%, 0);
+        }
+
+        .logo.fade {
+            opacity: 0;
+            transform: translateY(-2px);
+        }
+
+        .menu-toggle {
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            position: absolute;
+            right: 32px;
+            top: 9px;
+            z-index: 1002;
+            flex-shrink: 0;
+        }
+
+        .menu-toggle span,
+        .project-close span {
+            position: absolute;
+            width: 24px;
+            height: 1px;
+            background: var(--text);
+            left: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle span:nth-child(1) { top: 10px; }
+        .menu-toggle span:nth-child(2) { top: 16px; }
+        .menu-toggle span:nth-child(3) { top: 22px; }
+
+        .project-close span:nth-child(1) { top: 10px; }
+        .project-close span:nth-child(2) { top: 16px; }
+        .project-close span:nth-child(3) { top: 22px; }
+
+        .menu-toggle.active span:nth-child(1),
+        .project-close.active span:nth-child(1) {
+            transform: rotate(45deg);
+            top: 16px;
+        }
+
+        .menu-toggle.active span:nth-child(2),
+        .project-close.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3),
+        .project-close.active span:nth-child(3) {
+            transform: rotate(-45deg);
+            top: 16px;
+        }
+
+        .dropdown-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding-top: 64px;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.18);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+            transform: translateY(-120%);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+        }
+
+        .dropdown-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        @media (min-width: 769px) {
+            .dropdown-menu {
+                padding-top: 42px;
+            }
+            .menu-content {
+                padding: 10px 0;
+            }
+            .menu-items {
+                gap: 156px;
+            }
+            .menu-items a,
+            .menu-items .social-link {
+                font-size: 13px;
+                letter-spacing: 0.4px;
+            }
+        }
+
+        .menu-content {
+            padding: 16px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .menu-items {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .menu-items a,
+        .menu-items .social-link {
+            font-size: 14px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 400;
+            text-transform: lowercase;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-menu.active .menu-items a,
+        .dropdown-menu.active .menu-items .social-link {
+            animation: fadeInDown 0.4s ease forwards;
+        }
+
+        .menu-items a:nth-child(1) { animation-delay: 0.05s; }
+        .menu-items a:nth-child(2) { animation-delay: 0.1s; }
+        .menu-items a:nth-child(3) { animation-delay: 0.15s; }
+        .menu-items a:nth-child(4) { animation-delay: 0.2s; }
+        .menu-items a:nth-child(5) { animation-delay: 0.25s; }
+        .menu-items .social-link { animation-delay: 0.3s; }
+
+        @keyframes fadeInDown {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .menu-items a:hover,
+        .menu-items .social-link:hover {
+            color: #666;
+        }
+
+        .menu-items a.active {
+            color: #000;
+            font-weight: 500;
+        }
+
+        .menu-items .social-link {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .menu-items svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text);
+            transition: stroke 0.3s ease;
+        }
+
+        .menu-items .social-link:hover svg {
+            stroke: #666;
+        }
+
+        main {
+            margin-top: 64px;
+            min-height: 100vh;
+        }
+
+        .gallery {
+            padding: 80px 50px;
+            max-width: 100vw;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        .gallery-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 33px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            width: 100%;
+            pointer-events: none;
+            margin-bottom: 0;
+        }
+
+        .gallery-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .code-card .image-container {
+            padding-top: 0;
+            height: 220px;
+            background: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .code-card .image-container:hover {
+            border-color: #aaa;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        }
+
+        .code-block {
+            width: 100%;
+            height: 100%;
+            padding: 20px 22px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+            background: var(--code-bg);
+            overflow-y: auto;
+            user-select: text;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .code-block .kw { color: var(--term-purple); font-weight: 500; }
+        .code-block .fn { color: var(--term-blue); }
+        .code-block .str { color: var(--term-green); }
+        .code-block .cmt { color: #999; font-style: italic; }
+        .code-block .num { color: var(--term-orange); }
+        .code-block .op  { color: #888; }
+
+        .gallery-caption {
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            color: #666;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        .gallery-caption strong {
+            font-weight: 500;
+            color: #222;
+        }
+
+        .press-banner {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+        }
+
+        .press-link {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 140px;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
+
+        .press-link span {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+            display: flex;
+            align-items: flex-end;
+            padding: 18px 24px;
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.3;
+            color: #fff;
+            letter-spacing: 0.6px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.65);
+            z-index: 2;
+        }
+
+        .press-link::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.0));
+            z-index: 1;
+        }
+
+        .info-section {
+            padding: 80px 50px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .info-section.hidden {
+            display: none;
+        }
+
+        .info-content h2 {
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: lowercase;
+        }
+
+        .info-content p {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .info-content a {
+            color: #000;
+            text-decoration: none;
+            position: relative;
+            background: linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.9) 50%, transparent 60%, transparent 100%);
+            background-size: 200% 100%;
+            background-position: 100% 0;
+            transition: background-position 0.6s ease, color 0.3s ease;
+        }
+
+        .info-content a:hover {
+            background-position: 0 0;
+            color: #000;
+        }
+
+        .project-view {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 1500;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+        }
+
+        .project-view.active {
+            display: flex;
+        }
+
+        .project-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.25);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+            min-height: 52px;
+            z-index: 1501;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 32px;
+        }
+
+        .project-header .logo {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) translateY(6px);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: lowercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .project-header .logo.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .project-close {
+            cursor: pointer;
+            position: absolute;
+            right: 32px;
+            top: 9px;
+            width: 28px;
+            height: 28px;
+        }
+
+        .project-content {
+            margin-top: 80px;
+            padding: 32px 50px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header-content,
+            .gallery {
+                padding-left: 25px;
+                padding-right: 25px;
+            }
+            .menu-toggle {
+                right: 25px;
+            }
+            .gallery {
+                padding: 50px 25px;
+            }
+            .gallery-grid {
+                flex-direction: column;
+            }
+            .menu-items {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .project-content {
+                padding: 16px 16px;
+            }
+            .code-card .image-container {
+                height: 180px;
+            }
+        }
+
+        header.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo" id="siteTitle">aether</div>
+            <div class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false" role="button" tabindex="0">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="dropdown-menu" id="dropdownMenu">
+        <div class="menu-content">
+            <div class="menu-items">
+                <a href="#" data-filter="core" class="active">core</a>
+                <a href="#" data-filter="memory">memory</a>
+                <a href="#" data-filter="tools">tools</a>
+                <a href="#" data-filter="skills">skills</a>
+                <a href="#" data-filter="runtime">runtime</a>
+                <a href="#info">about</a>
+                <a href="https://github.com/0penAGI/aether" target="_blank" class="social-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <section class="gallery page-fade" id="gallerySection">
+            <div class="gallery-grid">
+
+                <!-- CORE items -->
+                <div class="gallery-item code-card" data-category="core" data-project="event-bus">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">class</span> <span class="fn">EventBus</span>:
+    <span class="cmt"># Central event mesh</span>
+    <span class="kw">def</span> <span class="fn">subscribe</span>(<span class="kw">self</span>, event_type, handler):
+        <span class="cmt">...</span>
+
+    <span class="kw">def</span> <span class="fn">publish</span>(<span class="kw">self</span>, event):
+        <span class="cmt"># dispatch to all subscribers</span>
+        <span class="kw">for</span> handler <span class="kw">in</span> self._subscribers[event.type]:
+            handler(event)
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Event Bus</strong> · decoupled communication mesh</div>
+                </div>
+                <div class="gallery-item code-card" data-category="core" data-project="state-machine">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">class</span> <span class="fn">StateMachine</span>:
+    <span class="kw">def</span> <span class="fn">transition</span>(<span class="kw">self</span>, new_state, event):
+        <span class="kw">if</span> new_state <span class="kw">in</span> self.VALID_TRANSITIONS[self.state]:
+            self.state = new_state
+            <span class="kw">return</span> <span class="num">True</span>
+        <span class="kw">return</span> <span class="num">False</span>
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>State Machine</strong> · finite automaton for agent loops</div>
+                </div>
+                <div class="gallery-item code-card" data-category="core" data-project="tool-registry">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">class</span> <span class="fn">ToolRegistry</span>:
+    <span class="kw">def</span> <span class="fn">register</span>(<span class="kw">self</span>, name, func, capability):
+        self._tools[name] = func
+        self._capabilities[name] = capability
+
+    <span class="kw">def</span> <span class="fn">find_by_capability</span>(<span class="kw">self</span>, keyword):
+        <span class="kw">return</span> [name <span class="kw">for</span> name, cap <span class="kw">in</span> self._capabilities.items()
+                <span class="kw">if</span> keyword <span class="kw">in</span> cap.description]
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Tool Registry</strong> · capability graph & usage tracking</div>
+                </div>
+
+                <!-- MEMORY items -->
+                <div class="gallery-item code-card" data-category="memory" data-project="memory-store">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">class</span> <span class="fn">MemoryStore</span>:
+    <span class="kw">def</span> <span class="fn">save_short_term</span>(<span class="kw">self</span>, history, summaries):
+        <span class="cmt"># persist recent context</span>
+    <span class="kw">def</span> <span class="fn">rehydrate</span>(<span class="kw">self</span>, agent):
+        <span class="cmt"># restore agent state from disk</span>
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Memory Re‑hydration</strong> · persistent reconstructible state</div>
+                </div>
+                <div class="gallery-item code-card" data-category="memory" data-project="field-memory">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="cmt"># Field‑theoretic memory model</span>
+self.C = <span class="num">0.0</span>          <span class="cmt"># coherence scalar</span>
+self.m_field = {}     <span class="cmt"># tool outcome trace</span>
+self.e_history = []   <span class="cmt"># prediction error proxy</span>
+self.topology_T = <span class="num">0.0</span>  <span class="cmt"># stability measure</span>
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Field Memory</strong> · coherence, error, and topology dynamics</div>
+                </div>
+                <div class="gallery-item code-card" data-category="memory" data-project="vector-memory">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">def</span> <span class="fn">remember_vector</span>(<span class="kw">self</span>, text):
+    emb = self.embed(text)
+    self.vector_index.add(emb)
+<span class="kw">def</span> <span class="fn">recall_vector</span>(<span class="kw">self</span>, query, top_k=<span class="num">5</span>):
+    <span class="kw">return</span> self.vector_index.search(query)
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Vector Memory</strong> · FAISS‑based semantic recall</div>
+                </div>
+
+                <!-- TOOLS items (banners) -->
+                <div class="gallery-item press-banner" data-category="tools">
+                    <a href="https://github.com/0penAGI/aether" target="_blank" class="press-link" style="background:#2c2c2c;">
+                        <span>GitHub Repository · aether source code</span>
+                    </a>
+                </div>
+
+                <!-- SKILLS items -->
+                <div class="gallery-item code-card" data-category="skills" data-project="skill-mining">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">def</span> <span class="fn">_mine_skills</span>(<span class="kw">self</span>):
+    <span class="cmt"># detect repeating tool patterns</span>
+    <span class="kw">for</span> size <span class="kw">in</span> (<span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>):
+        window = self._skill_buffer[i:i+size]
+        <span class="kw">if</span> pattern_is_new(window):
+            self._register_derived_skill(name, tools)
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Skill Mining</strong> · n‑gram pattern discovery</div>
+                </div>
+                <div class="gallery-item code-card" data-category="skills" data-project="derived-skills">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="cmt"># Derived skills become first‑class tools</span>
+<span class="kw">def</span> <span class="fn">_register_derived_skill</span>(<span class="kw">self</span>, name, pattern):
+    <span class="kw">def</span> <span class="fn">skill_runner</span>(**kwargs):
+        <span class="kw">return</span> <span class="str">f"EXECUTED_SKILL:{name}"</span>
+    self.tool_registry.register(name, skill_runner, ...)
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Derived Skills</strong> · self‑modifying tool abstraction</div>
+                </div>
+
+                <!-- RUNTIME items -->
+                <div class="gallery-item code-card" data-category="runtime" data-project="gateway-loop">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">def</span> <span class="fn">_gateway_loop</span>(<span class="kw">self</span>):
+    <span class="kw">while</span> self._gateway_running:
+        events = self.event_bus.drain()
+        <span class="kw">for</span> event <span class="kw">in</span> events:
+            self._handle_gateway_event(event)
+        self._check_idle_timeout()
+        time.sleep(<span class="num">5</span>)
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Gateway Loop</strong> · persistent runtime skeleton</div>
+                </div>
+                <div class="gallery-item code-card" data-category="runtime" data-project="autonomous-breathing">
+                    <div class="image-container">
+                        <div class="code-block">
+<span class="kw">def</span> <span class="fn">_heartbeat</span>(<span class="kw">self</span>):
+    <span class="kw">while</span> self.breathing:
+        self._log_day_event(<span class="str">"tick"</span>)
+        <span class="kw">if</span> self.autonomous <span class="kw">and</span> time_since_last > <span class="num">900</span>:
+            self._autonomous_step()
+        time.sleep(self.breath_interval)
+</div>
+                    </div>
+                    <div class="gallery-caption"><strong>Autonomous Breathing</strong> · self‑generated tasks</div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="projectView" class="project-view">
+            <div class="project-header">
+                <div class="logo" id="projectTitle">Component</div>
+                <div class="project-close menu-toggle" id="closeProjectView">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="project-content" id="projectContent"></div>
+        </section>
+
+        <section id="info" class="info-section hidden page-fade">
+            <div class="info-content">
+                <h2>About Aether</h2>
+                <p><strong>Aether</strong> is an autonomous CLI agent designed by <strong>Elliia Belokopytova</strong> under the <strong>0penAGI</strong> initiative. It combines event‑driven architecture, persistent re‑hydratable memory, and self‑evolving tool skills into a single runtime that can plan, execute, verify, and fix code autonomously.</p>
+                <p>The system runs on a finite state machine with states like <code>IDLE → PLAN → EXECUTE → VERIFY → FIX → DONE</code>, and includes a custom event bus for decoupled communication. Memory is stored on disk and can be fully restored on restart — including short‑term context, long‑term skill traces, and even a vector index for semantic recall.</p>
+                <p>Aether continuously mines successful tool sequences to create new derived skills, which are then registered as first‑class tools in its registry. This self‑improving loop, together with autonomous breathing and gateway runtime, makes Aether a persistent creative partner in code.</p>
+                <p>Built with Python, Ollama, FAISS, and Rich.</p>
+                <p>
+                    <a href="mailto:elliia@0penagi.org">elliia@0penagi.org</a><br>
+                    <a href="https://github.com/0penAGI/aether" target="_blank">github.com/0penAGI/aether</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        menuToggle.addEventListener('click', () => {
+            dropdownMenu.style.visibility = '';
+            const expanded = menuToggle.classList.toggle('active');
+            dropdownMenu.classList.toggle('active');
+            menuToggle.setAttribute('aria-expanded', expanded);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                dropdownMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dropdownMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
+        });
+
+        const infoLink = document.querySelector('.menu-items a[href="#info"]');
+        let lastCategory = 'core';
+        let currentCategory = 'core';
+        const infoSection = document.getElementById('info');
+        const menuLinks = document.querySelectorAll('.menu-items a[data-filter]');
+        const items = document.querySelectorAll('.gallery-item');
+        const gallerySection = document.getElementById('gallerySection');
+        const siteTitle = document.getElementById('siteTitle');
+        const defaultTitle = siteTitle.textContent;
+
+        function animateNavTitle(label) {
+            const el = siteTitle;
+            if (!el) return;
+            el.classList.add('lift');
+            let sub = el.querySelector('.logo-sub');
+            if (!sub) {
+                sub = document.createElement('div');
+                sub.className = 'logo-sub';
+                sub.textContent = label;
+                el.appendChild(sub);
+            } else {
+                sub.textContent = label;
+            }
+            requestAnimationFrame(() => {
+                sub.classList.add('show');
+            });
+            setTimeout(() => {
+                el.classList.remove('lift');
+                sub.classList.remove('show');
+                setTimeout(() => {
+                    if (sub && sub.parentNode) {
+                        sub.parentNode.removeChild(sub);
+                    }
+                }, 400);
+            }, 1800);
+        }
+
+        function showItems(filter) {
+            currentCategory = filter;
+            items.forEach(item => {
+                const match = (filter === 'all' || item.dataset.category === filter);
+                if (match) {
+                    item.style.display = 'block';
+                    item.classList.remove('visible');
+                    void item.offsetHeight;
+                    setTimeout(() => {
+                        item.classList.add('visible');
+                    }, 40);
+                } else {
+                    item.classList.remove('visible');
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        menuLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const filter = link.dataset.filter;
+                currentCategory = filter;
+                animateNavTitle(filter || link.textContent.trim());
+                menuLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                infoSection.classList.add('hidden');
+                infoSection.classList.remove('visible');
+                gallerySection.style.display = 'block';
+                requestAnimationFrame(() => {
+                    gallerySection.classList.add('visible');
+                });
+                showItems(filter);
+                if (typeof isProjectOpen !== 'undefined' && isProjectOpen) {
+                    siteTitle.textContent = defaultTitle;
+                    isProjectOpen = false;
+                }
+                dropdownMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
+            });
+        });
+
+        infoLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            menuLinks.forEach(l => l.classList.remove('active'));
+            infoLink.classList.add('active');
+            animateNavTitle('about');
+            lastCategory = 'about';
+            gallerySection.classList.remove('visible');
+            gallerySection.style.display = 'none';
+            infoSection.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                infoSection.classList.add('visible');
+            });
+            window.scrollTo({ top: infoSection.offsetTop - 80, behavior: 'smooth' });
+            dropdownMenu.classList.remove('active');
+            menuToggle.classList.remove('active');
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.body.classList.add('ready');
+            }, 300);
+            const header = document.querySelector('header');
+            if (header) {
+                requestAnimationFrame(() => {
+                    header.classList.add('visible');
+                });
+            }
+            showItems('core');
+            requestAnimationFrame(() => {
+                gallerySection.classList.add('visible');
+            });
+        });
+
+        setTimeout(() => {
+            if (!document.body.classList.contains('ready')) {
+                document.body.classList.add('ready');
+            }
+        }, 1500);
+
+        // Project detail data
+        const projectsData = {
+            'event-bus': `<h2>Event Bus</h2>
+                <p>Central publish‑subscribe mesh that decouples all components. Handlers subscribe to <code>EventType</code> enums and react without direct coupling. Events include <code>TOOL_FAILED</code>, <code>IDLE_TIMEOUT</code>, <code>SKILL_DISCOVERED</code>, etc. The bus keeps a rolling log of the last 500 events for introspection.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px; overflow-x:auto;">
+<span class="kw">class</span> <span class="fn">EventBus</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>):
+        <span class="kw">self</span>._subscribers = {}
+        <span class="kw">self</span>._event_log = []
+
+    <span class="kw">def</span> <span class="fn">subscribe</span>(<span class="kw">self</span>, event_type: EventType, handler):
+        <span class="kw">self</span>._subscribers.setdefault(event_type, []).append(handler)
+
+    <span class="kw">def</span> <span class="fn">publish</span>(<span class="kw">self</span>, event: Event):
+        <span class="kw">self</span>._event_log.append(event)
+        <span class="kw">for</span> handler <span class="kw">in</span> <span class="kw">self</span>._subscribers.get(event.type, []):
+            handler(event)
+</pre>`,
+            'state-machine': `<h2>State Machine</h2>
+                <p>Implements a finite automaton with valid transitions: <code>IDLE → PLAN → EXECUTE → VERIFY → DONE</code>, plus <code>FIX</code> and <code>INTERRUPTED</code> states. Events can force a state change, e.g., an idle timeout transitions to <code>SLEEPING</code>. The machine logs every transition for debugging.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">class</span> <span class="fn">StateMachine</span>:
+    VALID_TRANSITIONS = {
+        AgentState.IDLE: [AgentState.PLAN, AgentState.SLEEPING],
+        AgentState.PLAN: [AgentState.EXECUTE, AgentState.IDLE],
+        ...
+    }
+    <span class="kw">def</span> <span class="fn">transition</span>(<span class="kw">self</span>, new_state, event=None):
+        <span class="kw">if</span> new_state <span class="kw">in</span> self.VALID_TRANSITIONS[self.state]:
+            self.state = new_state
+            <span class="kw">return</span> True
+        <span class="kw">return</span> False
+</pre>`,
+            'tool-registry': `<h2>Tool Registry</h2>
+                <p>Stores tools and their <code>ToolCapability</code> metadata (side effects, required/produced resources, risk level). Tracks a usage graph and success rates, enabling recommendations for chaining tools. Supports capability‑based lookup and dynamic skill registration.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">class</span> <span class="fn">ToolRegistry</span>:
+    <span class="kw">def</span> <span class="fn">register</span>(<span class="kw">self</span>, name, func, capability):
+        ...
+    <span class="kw">def</span> <span class="fn">get_chain_recommendation</span>(<span class="kw">self</span>, tool_name):
+        <span class="cmt"># return next tools sorted by historical success rate</span>
+</pre>`,
+            'memory-store': `<h2>Memory Re‑hydration</h2>
+                <p>All agent state is persisted to disk in JSON files. On startup, <code>MemoryStore.rehydrate()</code> restores history, summaries, skill memory, tool usage graphs, reward history, and even field variables. This allows the agent to resume from where it left off after a restart.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">def</span> <span class="fn">rehydrate</span>(<span class="kw">self</span>, agent):
+    short = self.load_short_term()
+    long = self.load_long_term()
+    agent.history = short.get(<span class="str">'history'</span>, [])
+    agent.skill_memory = long.get(<span class="str">'skill_memory'</span>, {})
+    ...
+</pre>`,
+            'field-memory': `<h2>Field‑Theoretic Memory</h2>
+                <p>A lightweight dynamic model inspired by field theory: <em>C</em> (coherence), <em>m_field</em> (tool outcomes), <em>e_history</em> (error proxy), and <em>topology_T</em> (stability). These are updated after each tool call and influence autonomous decision‑making.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+self.C = 0.9 * self.C + 0.1 * (1.0 - e)   <span class="cmt"># smooth coherence</span>
+self.topology_T = 0.8 * self.topology_T + 0.2 * stability
+</pre>`,
+            'vector-memory': `<h2>Vector Memory (FAISS)</h2>
+                <p>Every meaningful message is embedded using <code>nomic-embed-text</code> and stored in a FAISS <code>IndexFlatIP</code>. The agent can later recall semantically similar memories via <code>recall_vector(query)</code>, providing a long‑term associative memory layer.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">def</span> <span class="fn">remember_vector</span>(<span class="kw">self</span>, text):
+    emb = self.embed(text)
+    self.vector_index.add(emb)
+    self.vector_memory.append({<span class="str">'text'</span>: text, ...})
+</pre>`,
+            'skill-mining': `<h2>Skill Mining</h2>
+                <p>The agent buffers successful (step, tool) pairs and periodically scans for repeating n‑grams (length 2‑4). When a novel pattern is found, it is registered as a derived skill — a reusable macro that can be invoked directly in future plans.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">for</span> size <span class="kw">in</span> (<span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>):
+    window = self._skill_buffer[i:i+size]
+    <span class="kw">if</span> pattern_is_new(window):
+        self._register_derived_skill(name, tools)
+</pre>`,
+            'derived-skills': `<h2>Derived Skills</h2>
+                <p>Derived skills become first‑class citizens in the tool registry, with their own capability metadata. They can be called like any other tool and appear in the usage graph. This allows the agent to abstract and reuse complex action sequences.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">def</span> <span class="fn">_register_derived_skill</span>(<span class="kw">self</span>, name, pattern):
+    <span class="kw">def</span> <span class="fn">skill_runner</span>(**kwargs):
+        <span class="kw">return</span> f<span class="str">"EXECUTED_SKILL:{name}"</span>
+    self.tool_registry.register(name, skill_runner, capability)
+</pre>`,
+            'gateway-loop': `<h2>Gateway Loop</h2>
+                <p>The persistent gateway thread drains the event bus, checks for idle timeouts, watches files, and triggers autonomous impulses. It runs every 5 seconds, keeping the agent alive and responsive without a blocking main loop.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">while</span> self._gateway_running:
+    events = self.event_bus.drain()
+    <span class="kw">for</span> event <span class="kw">in</span> events:
+        self._handle_gateway_event(event)
+    self._check_idle_timeout()
+    time.sleep(<span class="num">5</span>)
+</pre>`,
+            'autonomous-breathing': `<h2>Autonomous Breathing</h2>
+                <p>A separate thread generates "breath pulses" every 60 seconds, logs daily markers, and occasionally triggers autonomous task generation when the agent has been idle for 15 minutes. This creates a self‑sustaining creative loop.</p>
+                <pre class="code-block" style="background:#f7f7f7; padding:20px; border-radius:8px;">
+<span class="kw">def</span> <span class="fn">_heartbeat</span>(<span class="kw">self</span>):
+    <span class="kw">while</span> self.breathing:
+        self._log_day_event(<span class="str">"tick"</span>)
+        <span class="kw">if</span> self.autonomous <span class="kw">and</span> idle > <span class="num">900</span>:
+            self._autonomous_step()
+        time.sleep(self.breath_interval)
+</pre>`
+        };
+
+        const projectView = document.getElementById('projectView');
+        const projectContent = document.getElementById('projectContent');
+        const projectTitle = document.getElementById('projectTitle');
+        const closeProject = document.getElementById('closeProjectView');
+        const galleryGrid = document.querySelector('.gallery-grid');
+
+        document.querySelectorAll('.gallery-item[data-project]').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.project;
+                if (!projectsData[id]) return;
+                galleryGrid.style.display = 'none';
+                projectContent.innerHTML = projectsData[id];
+                const h2 = projectContent.querySelector('h2');
+                if (h2) {
+                    projectTitle.textContent = h2.textContent;
+                    siteTitle.classList.add('fade');
+                    setTimeout(() => {
+                        siteTitle.textContent = h2.textContent;
+                        siteTitle.classList.remove('fade');
+                    }, 400);
+                } else {
+                    projectTitle.textContent = 'Component';
+                }
+                projectView.classList.add('active');
+                projectView.style.display = 'flex';
+                requestAnimationFrame(() => {
+                    closeProject.classList.add('active');
+                    projectTitle.classList.add('show');
+                });
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            });
+        });
+
+        function closeProjectView() {
+            projectView.classList.remove('active');
+            closeProject.classList.remove('active');
+            projectTitle.classList.remove('show');
+            setTimeout(() => {
+                projectView.style.display = 'none';
+            }, 400);
+            galleryGrid.style.display = 'flex';
+            siteTitle.classList.add('fade');
+            setTimeout(() => {
+                siteTitle.textContent = defaultTitle;
+                siteTitle.classList.remove('fade');
+            }, 400);
+            projectContent.innerHTML = '';
+            lastCategory = 'core';
+            const defaultLink = document.querySelector('.menu-items a[data-filter="core"]');
+            if (defaultLink) {
+                menuLinks.forEach(l => l.classList.remove('active'));
+                defaultLink.classList.add('active');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        closeProject.addEventListener('click', closeProjectView);
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && projectView.classList.contains('active')) {
+                closeProjectView();
+            }
+        });
+
+        // Disable context menu & drag
+        (function(){
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('dragstart', e => e.preventDefault());
+            document.addEventListener('selectstart', function(e) {
+                if (!e.target.closest('input, textarea, .code-block')) {
+                    e.preventDefault();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
