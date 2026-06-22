@@ -1,25 +1,25 @@
 # Aether
 
-Aether — автономный CLI-агент для написания и рефакторинга кода через Ollama.
+Aether is an autonomous CLI agent for writing and refactoring code through Ollama.
 
 ```bash
-aether "Напиши тесты для модуля parser.py"
-aether --init          # первый запуск: выбор модели Ollama
+aether "Write tests for parser.py"
+aether --init          # first run: select an Ollama model
 aether --help
 ```
 
-## Возможности
+## Features
 
-- **Нативный tool calling** через Ollama (`ollama.chat(tools=...)`) — модель сама решает, читать файл, писать, запускать shell или искать код
-- **Единый путь выполнения**: tool calling — основной, текстовый fallback при ошибке API
-- **edit_file с diff-first**: точечные замены через `[{old, new}]`, полная перезапись только для новых файлов или >50% изменений
-- **Подтверждение опасных действий**: запрос подтверждения перед `write_file`, `edit_file`, `run_shell` (отключается через `--yes`)
-- **Контекст проекта**: AST-парсинг .py-файлов для анализа импортов и структуры
-- **Simple chat detection**: короткие сообщения определяются как диалог без вызова инструментов
-- **Bilingual**: промпты на русском и английском
-- **Умная память**: логирование действий в `aether_memory.json` с поиском по ключевым словам
+- **Native tool calling** via Ollama (`ollama.chat(tools=...)`) — the model decides whether to read a file, write code, run a shell command, or search the codebase
+- **Single execution path**: tool calling is primary, text-based fallback used only on API error
+- **Diff-first editing**: targeted replacements with `[{old, new}]`; full rewrite only for new files or >50% changes
+- **Action confirmation**: prompts before `write_file`, `edit_file`, `run_shell` (disable with `--yes`)
+- **Project context**: AST-based parsing of `.py` files for import analysis and structure awareness
+- **Simple chat detection**: short messages are treated as conversation without tool invocation
+- **Bilingual prompts**: Russian and English
+- **Smart memory**: logs actions to `aether_memory.json` with keyword search
 
-## Установка
+## Install
 
 ```bash
 git clone https://github.com/0penAGI/aether.git
@@ -30,64 +30,64 @@ pip install -r requirements.txt
 ./install.sh
 ```
 
-После `install.sh` команда `aether` будет доступна глобально (symlink в `~/.local/bin`).
+After `install.sh`, the `aether` command is available globally (symlinked to `~/.local/bin`).
 
-## Использование
+## Usage
 
 ```bash
-# Первый запуск — выбор модели
+# First run — pick your model
 aether --init
 
-# Выполнить задачу
-aether "Создай файл hello.py с функцией приветствия"
+# Run a task
+aether "Create hello.py with a greeting function"
 
-# Пропустить подтверждения
-aether --yes "Отрефактори main.py, вынеси логику в отдельные функции"
+# Skip confirmation prompts
+aether --yes "Refactor main.py, extract logic into separate functions"
 
-# Указать модель (переопределяет сохранённую в конфиге)
-aether --model qwen2.5-coder "Напиши юнит-тесты"
+# Override the saved model
+aether --model qwen2.5-coder "Write unit tests"
 ```
 
-### Флаги
+### Flags
 
-| Флаг | Описание |
-|------|----------|
-| `--init` | Первоначальная настройка (выбор модели Ollama) |
-| `--model`, `-m` | Модель Ollama (переопределяет конфиг) |
-| `--yes`, `-y` | Пропустить все подтверждения |
-| `task` | Задача для выполнения (позиционный аргумент) |
+| Flag | Description |
+|------|-------------|
+| `--init` | First-time setup (model selection) |
+| `--model`, `-m` | Ollama model override |
+| `--yes`, `-y` | Skip all confirmations |
+| `task` | Task to execute (positional argument) |
 
-## Тестирование
+## Tests
 
 ```bash
-# unit-тесты (52 теста)
+# unit tests (52 tests)
 pytest test_aether.py -v
 
-# интеграционные тесты (требуют запущенный Ollama)
+# integration tests (require a running Ollama server)
 pytest test_aether_integration.py -v
 
-# все тесты
+# all tests
 pytest test_aether.py test_aether_integration.py -v
 ```
 
-## Зависимости
+## Requirements
 
-- [Ollama](https://ollama.ai) — запущенный сервер с поддержкой tool calling
+- [Ollama](https://ollama.ai) — running server with tool calling support
 - Python 3.10+
-- `ollama`, `rich`, `numpy`, `faiss`, `playwright`, `requests` (см. `requirements.txt`)
+- `ollama`, `rich`, `numpy`, `faiss`, `playwright`, `requests` (see `requirements.txt`)
 
-## Структура
+## Structure
 
 ```
-├── aether.py               # Основной агент (2836 строк, 112 методов, 9 классов)
-├── aether_config.py        # CLI-вход, конфиг, first-run wizard
-├── bin/aether              # bash-обёртка для запуска
-├── test_aether.py          # 52 unit-теста
-├── test_aether_integration.py  # 13 интеграционных тестов
-├── install.sh              # Установка в ~/.local/bin
-└── requirements.txt        # Зависимости
+├── aether.py               # Core agent (2836 lines, 112 methods, 9 classes)
+├── aether_config.py        # CLI entry, config management, first-run wizard
+├── bin/aether              # Bash wrapper
+├── test_aether.py          # 52 unit tests
+├── test_aether_integration.py  # 13 integration tests
+├── install.sh              # Install to ~/.local/bin
+└── requirements.txt        # Dependencies
 ```
 
-## Лицензия
+## License
 
 MIT
