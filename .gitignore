@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.aether_backups/
+.aether_state/
+aether_memory.json
+aether_daily_memory.json
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/

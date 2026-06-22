@@ -1,0 +1,17 @@
+numpy
+scipy
+matplotlib
+transformers
+torch
+pennylane
+fastapi
+uvicorn
+websockets
+deep-translator
+TTS
+jiwer
+pyyaml
+SpeechRecognition
+PyAudio
+aiortc
+pocketsphinx

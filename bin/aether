@@ -1,0 +1,21 @@
+#!/bin/bash
+# Aether CLI — finds project root and runs the agent
+# Works when called as ./bin/aether, venv/bin/aether, or via PATH
+
+# Resolve symlinks to find the real script location
+SCRIPT_SRC="${BASH_SOURCE[0]:-$0}"
+while [ -h "$SCRIPT_SRC" ]; do
+    SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SRC")" && pwd)"
+    SCRIPT_SRC="$(readlink "$SCRIPT_SRC")"
+    [[ "$SCRIPT_SRC" != /* ]] && SCRIPT_SRC="$SCRIPT_DIR/$SCRIPT_SRC"
+done
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SRC")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [ -f "$PROJECT_DIR/venv/bin/python3" ]; then
+    PYTHON="$PROJECT_DIR/venv/bin/python3"
+else
+    PYTHON="python3"
+fi
+
+cd "$PROJECT_DIR" && exec "$PYTHON" "$PROJECT_DIR/aether_config.py" "$@"
